@@ -1,0 +1,1 @@
+code example when read book `Programming in Scala Third Edition(ch)`

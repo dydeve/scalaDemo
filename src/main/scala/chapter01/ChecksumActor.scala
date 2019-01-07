@@ -1,6 +1,6 @@
 package chapter01
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 /**
   * java线程模型围绕共享内存实现(shared memory),
@@ -10,32 +10,41 @@ import akka.actor.{Actor, ActorSystem}
   *
   * <a href="https://doc.akka.io/docs/akka/2.5.4/scala/general/jmm.html">Akka and the Java Memory Model</a>
   */
-/*
+object ChecksumActor {
+  def props() = Props(new ChecksumActor)
+}
+
 class ChecksumActor extends Actor {
 
   var sum = 0
 
   override def receive: Receive = {
-    case Data(byte) => sum += byte
+
+    case Data(x) => sum += x
+
     case GetChecksum(requester) => {
       val checksum = ~(sum & 0xFF) + 1
-      requester ! checksum
+      requester ! "result: " + checksum
     }
+
   }
 }
 
-case class Data(byte: Byte)
+final case class Data(value: Int)
 
-case class GetChecksum(requester: Actor)
+final case class GetChecksum(requester: ActorRef)
 
 
 object Run extends App {
 
+
   val system = ActorSystem("testSystem")
 
-  def props: Props =
-    Props(new PrintMyActorRefActor)
+  val checksumActor = system.actorOf(ChecksumActor.props(), "checksum")
 
-  val firstRef = system.actorOf()
+  checksumActor ! 1
+  checksumActor ! 2
+  checksumActor ! 3
 
-}*/
+
+}
